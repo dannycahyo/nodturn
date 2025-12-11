@@ -15,14 +15,21 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@react-router/node": "7.10.1",
     "@react-router/serve": "7.10.1",
+    "@tensorflow-models/face-landmarks-detection": "^1.0.6",
+    "@tensorflow/tfjs": "^4.22.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "idb-keyval": "^6.2.2",
     "isbot": "^5.1.31",
     "lucide-react": "^0.559.0",
+    "pdfjs-dist": "^5.4.449",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-pdf": "^10.2.0",
     "react-router": "7.10.1",
-    "tailwind-merge": "^3.4.0"
+    "react-webcam": "^7.2.0",
+    "tailwind-merge": "^3.4.0",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@react-router/dev": "7.10.1",
