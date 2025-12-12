@@ -123,6 +123,7 @@ export function PDFViewer({ fileBlob }: PDFViewerProps) {
     (pdf: any) => {
       if (!mountedRef.current) return;
 
+      console.log('[PDFViewer] Document loaded successfully', { numPages: pdf.numPages });
       // Simply track page count - let react-pdf handle the rest
       dispatch({ type: 'SET_NUM_PAGES', payload: pdf.numPages });
       setTotalPages(pdf.numPages);

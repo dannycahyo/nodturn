@@ -4,10 +4,10 @@ export interface ExtractedMetadata {
 }
 
 export async function extractPDFMetadata(
-  file: File
+  file: File,
 ): Promise<ExtractedMetadata> {
   const pdfjs = await import('pdfjs-dist');
-  
+
   // Configure worker if not already set
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -15,7 +15,7 @@ export async function extractPDFMetadata(
       import.meta.url,
     ).toString();
   }
-  
+
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 
@@ -24,7 +24,11 @@ export async function extractPDFMetadata(
   try {
     const metadata = await pdf.getMetadata();
     const info = metadata.info as Record<string, unknown>;
-    if (info?.Title && typeof info.Title === 'string' && info.Title.trim()) {
+    if (
+      info?.Title &&
+      typeof info.Title === 'string' &&
+      info.Title.trim()
+    ) {
       title = info.Title.trim();
     }
   } catch (error) {
@@ -33,7 +37,7 @@ export async function extractPDFMetadata(
 
   return {
     title,
-    pageCount: pdf.numPages
+    pageCount: pdf.numPages,
   };
 }
 
