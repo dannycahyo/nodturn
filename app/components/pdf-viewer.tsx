@@ -34,7 +34,10 @@ type ViewerAction =
   | { type: 'SET_IS_CLIENT'; payload: boolean }
   | { type: 'SET_NUM_PAGES'; payload: number | null };
 
-function viewerReducer(state: ViewerState, action: ViewerAction): ViewerState {
+function viewerReducer(
+  state: ViewerState,
+  action: ViewerAction,
+): ViewerState {
   switch (action.type) {
     case 'SET_FILE_URL':
       return { ...state, fileUrl: action.payload };
@@ -104,7 +107,10 @@ export function PDFViewer({ fileBlob }: PDFViewerProps) {
       } catch (err) {
         console.error('Failed to create blob URL:', err);
         if (mountedRef.current) {
-          dispatch({ type: 'SET_ERROR', payload: 'Failed to load PDF file' });
+          dispatch({
+            type: 'SET_ERROR',
+            payload: 'Failed to load PDF file',
+          });
         }
       }
     }
@@ -123,7 +129,6 @@ export function PDFViewer({ fileBlob }: PDFViewerProps) {
     (pdf: any) => {
       if (!mountedRef.current) return;
 
-      console.log('[PDFViewer] Document loaded successfully', { numPages: pdf.numPages });
       // Simply track page count - let react-pdf handle the rest
       dispatch({ type: 'SET_NUM_PAGES', payload: pdf.numPages });
       setTotalPages(pdf.numPages);
@@ -174,7 +179,10 @@ export function PDFViewer({ fileBlob }: PDFViewerProps) {
     (node: HTMLDivElement | null) => {
       if (node) {
         const updateWidth = () => {
-          dispatch({ type: 'SET_CONTAINER_WIDTH', payload: node.offsetWidth });
+          dispatch({
+            type: 'SET_CONTAINER_WIDTH',
+            payload: node.offsetWidth,
+          });
         };
         updateWidth();
         window.addEventListener('resize', updateWidth);
@@ -278,7 +286,10 @@ export function PDFViewer({ fileBlob }: PDFViewerProps) {
           onLoadError={(error) => {
             console.error('Page load error:', error);
             if (mountedRef.current) {
-              dispatch({ type: 'SET_ERROR', payload: 'Failed to load page content' });
+              dispatch({
+                type: 'SET_ERROR',
+                payload: 'Failed to load page content',
+              });
             }
           }}
         />

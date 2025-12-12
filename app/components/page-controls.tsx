@@ -10,16 +10,19 @@ interface PageControlsProps {
   modelLoading?: boolean;
 }
 
-export function PageControls({ onToggleGestures, gestureEnabled = false, modelLoading = false }: PageControlsProps) {
-  const { currentPage, totalPages, nextPage, prevPage } = usePerformanceStore();
+export function PageControls({
+  onToggleGestures,
+  gestureEnabled = false,
+  modelLoading = false,
+}: PageControlsProps) {
+  const { currentPage, totalPages, nextPage, prevPage } =
+    usePerformanceStore();
 
   const handlePrevClick = () => {
-    console.log('[PageControls] Prev button clicked');
     prevPage();
   };
 
   const handleNextClick = () => {
-    console.log('[PageControls] Next button clicked');
     nextPage();
   };
 
@@ -58,13 +61,17 @@ export function PageControls({ onToggleGestures, gestureEnabled = false, modelLo
 
       {onToggleGestures && (
         <Button
-          variant={gestureEnabled ? "default" : "ghost"}
+          variant={gestureEnabled ? 'default' : 'ghost'}
           size="sm"
           onClick={onToggleGestures}
           disabled={modelLoading}
         >
           <Hand className="h-4 w-4 mr-2" />
-          {modelLoading ? 'Loading...' : gestureEnabled ? 'Gestures On' : 'Gestures'}
+          {modelLoading
+            ? 'Loading...'
+            : gestureEnabled
+              ? 'Gestures On'
+              : 'Gestures'}
         </Button>
       )}
 

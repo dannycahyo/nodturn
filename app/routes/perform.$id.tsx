@@ -50,15 +50,8 @@ function performReducer(
     case 'SET_IS_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_VIDEO_ELEMENT':
-      console.log('[PerformReducer] SET_VIDEO_ELEMENT', {
-        hasVideo: !!action.payload,
-      });
       return { ...state, videoElement: action.payload };
     case 'TOGGLE_GESTURE':
-      console.log('[PerformReducer] TOGGLE_GESTURE', {
-        from: state.gestureEnabled,
-        to: !state.gestureEnabled,
-      });
       // Reset videoElement when turning gestures off to prevent stale references
       return {
         ...state,
@@ -106,37 +99,11 @@ export default function Perform() {
   // Handle video element ready
   const handleVideoReady = useCallback(
     (video: HTMLVideoElement | null) => {
-      console.log('[Perform] Video ready callback', {
-        video: !!video,
-        dimensions: video
-          ? `${video.videoWidth}x${video.videoHeight}`
-          : 'N/A',
-      });
       dispatch({ type: 'SET_VIDEO_ELEMENT', payload: video });
       setCameraEnabled(!!video);
     },
     [], // setCameraEnabled is stable from Zustand
   );
-
-  // Debug: Log hook inputs
-  useEffect(() => {
-    console.log('[Perform] useHeadTracking inputs', {
-      detector: !!detector,
-      videoElement: !!state.videoElement,
-      videoReady: state.videoElement
-        ? `${state.videoElement.videoWidth}x${state.videoElement.videoHeight}`
-        : 'N/A',
-      gestureEnabled: state.gestureEnabled,
-      modelLoading,
-      modelError,
-    });
-  }, [
-    detector,
-    state.videoElement,
-    state.gestureEnabled,
-    modelLoading,
-    modelError,
-  ]);
 
   // Start head tracking
   const { poses, rollAngle, velocity } = useHeadTracking(
@@ -145,20 +112,9 @@ export default function Perform() {
     state.gestureEnabled,
   );
 
-  // Debug: Log hook outputs
-  useEffect(() => {
-    console.log('[Perform] useHeadTracking outputs', {
-      posesCount: poses.length,
-      rollAngle,
-    });
-  }, [poses.length, rollAngle]);
-
   // Cleanup video element when gestures are disabled
   useEffect(() => {
     if (!state.gestureEnabled && state.videoElement) {
-      console.log(
-        '[Perform] Gestures disabled, cleaning up video element',
-      );
       dispatch({ type: 'SET_VIDEO_ELEMENT', payload: null });
       setCameraEnabled(false);
     }
@@ -185,44 +141,36 @@ export default function Perform() {
 
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
-      console.log('[Perform] Keyboard event', { key: e.key });
       switch (e.key) {
         case 'ArrowRight':
         case 'ArrowDown':
         case ' ':
         case 'PageDown':
           e.preventDefault();
-          console.log('[Perform] Next page key pressed');
           nextPage();
           break;
         case 'ArrowLeft':
         case 'ArrowUp':
         case 'PageUp':
           e.preventDefault();
-          console.log('[Perform] Prev page key pressed');
           prevPage();
           break;
         case 'Home':
           e.preventDefault();
-          console.log('[Perform] Home key pressed');
           setCurrentPage(1);
           break;
         case 'End':
           e.preventDefault();
-          console.log('[Perform] End key pressed');
           if (state.pdf) setCurrentPage(state.pdf.pageCount);
           break;
         case 'Escape':
-          console.log('[Perform] Escape key pressed');
           window.location.href = '/library';
           break;
       }
     };
 
-    console.log('[Perform] Setting up keyboard event listener');
     window.addEventListener('keydown', handleKeyboard);
     return () => {
-      console.log('[Perform] Removing keyboard event listener');
       window.removeEventListener('keydown', handleKeyboard);
     };
   }, [nextPage, prevPage, setCurrentPage, state.pdf]);
@@ -266,9 +214,6 @@ export default function Perform() {
       </ClientOnly>
       <PageControls
         onToggleGestures={() => {
-          console.log('[Perform] Toggling gestures', {
-            currentState: state.gestureEnabled,
-          });
           dispatch({ type: 'TOGGLE_GESTURE' });
         }}
         gestureEnabled={state.gestureEnabled}

@@ -76,36 +76,15 @@ export function useHeadTracking(
   } = useSettingsStore();
 
   useEffect(() => {
-    console.log('[HeadTracking] Effect triggered', {
-      detector: !!detector,
-      videoElement: !!videoElement,
-      enabled,
-      videoReady: videoElement
-        ? `${videoElement.videoWidth}x${videoElement.videoHeight}`
-        : 'N/A',
-    });
-
     if (!detector || !videoElement || !enabled) {
       setPoseDetected(false);
       setPoses([]);
-      console.log(
-        '[HeadTracking] Conditions not met, stopping detection',
-      );
       return;
     }
 
     let animationId: number;
     let isDetecting = true;
     let frameCount = 0;
-
-    console.log('[HeadTracking] Starting detection loop', {
-      videoWidth: videoElement.videoWidth,
-      videoHeight: videoElement.videoHeight,
-      readyState: videoElement.readyState,
-      paused: videoElement.paused,
-      videoSrc: videoElement.src || 'stream',
-      videoCurrentTime: videoElement.currentTime,
-    });
 
     const detect = async () => {
       if (!isDetecting) return;
@@ -120,27 +99,6 @@ export function useHeadTracking(
         setPoses(detectedPoses);
 
         frameCount++;
-        if (frameCount % 30 === 0) {
-          console.log('[HeadTracking] Detection running', {
-            frameCount,
-            posesDetected: detectedPoses.length,
-            videoState: {
-              width: videoElement.videoWidth,
-              height: videoElement.videoHeight,
-              readyState: videoElement.readyState,
-              paused: videoElement.paused,
-              currentTime: videoElement.currentTime,
-            },
-            detectorWorking: detectedPoses !== undefined,
-            firstPoseData:
-              detectedPoses.length > 0
-                ? {
-                    keypointsCount: detectedPoses[0].keypoints.length,
-                    score: detectedPoses[0].score,
-                  }
-                : null,
-          });
-        }
 
         if (detectedPoses.length === 0) {
           setPoseDetected(false);
@@ -192,26 +150,7 @@ export function useHeadTracking(
                 );
                 neutralAngleRef.current =
                   sum / neutralCalibrationFrames.current.length;
-                console.log(
-                  '[HeadTracking] Neutral angle calibrated:',
-                  {
-                    neutralAngle: neutralAngleRef.current.toFixed(2),
-                    samples: neutralCalibrationFrames.current.length,
-                  },
-                );
               }
-            }
-
-            if (frameCount % 30 === 0) {
-              console.log('[HeadTracking] Angle calculated', {
-                rawAngle: rawAngle.toFixed(2),
-                smoothedAngle: smoothedAngle.toFixed(2),
-                neutralAngle:
-                  neutralAngleRef.current?.toFixed(2) ||
-                  'calibrating',
-                leftEar,
-                rightEar,
-              });
             }
 
             const now = Date.now();
@@ -224,16 +163,6 @@ export function useHeadTracking(
                 lastAngleRef.current,
                 timeDelta,
               );
-            }
-
-            if (frameCount % 30 === 0) {
-              console.log('[HeadTracking] Gesture check', {
-                smoothedAngle: smoothedAngle.toFixed(2),
-                velocity: velocity.toFixed(2),
-                angleThreshold: gestureAngleThreshold,
-                lastTimestamp: lastTimestampRef.current,
-                timeDelta,
-              });
             }
 
             // Check for sustained gesture trigger (only after calibration)
@@ -266,19 +195,6 @@ export function useHeadTracking(
               const currentDirection =
                 deviation > 0 ? 'right' : 'left';
 
-              if (frameCount % 30 === 0) {
-                console.log('[HeadTracking] Gesture check', {
-                  smoothedAngle: smoothedAngle.toFixed(2),
-                  neutralAngle: neutralAngleRef.current.toFixed(2),
-                  deviation: deviation.toFixed(2),
-                  absDeviation: absDeviation.toFixed(2),
-                  threshold: gestureAngleThreshold,
-                  deadZone: DEAD_ZONE,
-                  isInDeadZone,
-                  exceeds: angleExceedsThreshold,
-                });
-              }
-
               // Reset pending gesture if user returns to dead zone
               if (isInDeadZone) {
                 thresholdExceededAtRef.current = 0;
@@ -300,16 +216,6 @@ export function useHeadTracking(
                     holdTime >= gestureHoldDuration &&
                     timeSinceLastTurn > gestureCooldown
                   ) {
-                    console.log(
-                      '[HeadTracking] 🎯 SUSTAINED GESTURE TRIGGERED!',
-                      {
-                        angle: smoothedAngle.toFixed(2),
-                        direction: currentDirection,
-                        holdTime,
-                        timeSinceLastTurn,
-                      },
-                    );
-
                     // Trigger page turn (reversed: left tilt = prev, right tilt = next)
                     if (currentDirection === 'right') {
                       prevPage();
@@ -366,7 +272,6 @@ export function useHeadTracking(
     detect();
 
     return () => {
-      console.log('[HeadTracking] Cleanup');
       isDetecting = false;
       if (animationId) {
         cancelAnimationFrame(animationId);

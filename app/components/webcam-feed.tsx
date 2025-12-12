@@ -25,40 +25,22 @@ export function WebcamFeed({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleUserMedia = useCallback(() => {
-    console.log('[WebcamFeed] onUserMedia callback triggered');
     // Wait for stream to be ready before passing video element
     if (webcamRef.current?.video) {
       const video = webcamRef.current.video;
-      console.log('[WebcamFeed] Video element found', {
-        videoWidth: video.videoWidth,
-        videoHeight: video.videoHeight,
-        readyState: video.readyState,
-      });
       // Ensure video has valid dimensions before passing to detector
       if (video.videoWidth > 0 && video.videoHeight > 0) {
-        console.log(
-          '[WebcamFeed] Video ready immediately, calling onVideoReady',
-        );
         onVideoReady(video);
       } else {
-        console.log(
-          '[WebcamFeed] Video dimensions not ready, waiting for loadedmetadata',
-        );
         // Wait for loadedmetadata event if dimensions not ready
         video.addEventListener(
           'loadedmetadata',
           () => {
-            console.log('[WebcamFeed] loadedmetadata event fired', {
-              videoWidth: video.videoWidth,
-              videoHeight: video.videoHeight,
-            });
             onVideoReady(video);
           },
           { once: true },
         );
       }
-    } else {
-      console.log('[WebcamFeed] No video element in webcamRef');
     }
   }, [onVideoReady]);
 
@@ -68,26 +50,13 @@ export function WebcamFeed({
     const video = webcamRef.current?.video;
 
     if (!canvas || !video) {
-      console.log('[WebcamFeed] Canvas or video not ready', {
-        canvas: !!canvas,
-        video: !!video,
-      });
       return;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      console.log('[WebcamFeed] Failed to get canvas context');
       return;
     }
-
-    console.log('[WebcamFeed] Canvas setup complete', {
-      canvasSize: { width: canvas.width, height: canvas.height },
-      videoSize: {
-        width: video.videoWidth,
-        height: video.videoHeight,
-      },
-    });
 
     let animationId: number;
     let isDrawing = true;
@@ -100,13 +69,6 @@ export function WebcamFeed({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       frameCount++;
-      if (frameCount % 30 === 0) {
-        console.log('[WebcamFeed] Drawing frame', {
-          posesCount: poses.length,
-          rollAngle,
-          threshold,
-        });
-      }
 
       if (poses.length === 0) {
         // Draw "No pose detected" message
@@ -236,15 +198,6 @@ export function WebcamFeed({
         rightEar?.score &&
         rightEar.score > MIN_CONFIDENCE
       ) {
-        if (frameCount % 30 === 0) {
-          console.log('[WebcamFeed] Drawing keypoints', {
-            leftEar,
-            rightEar,
-            scaleX,
-            scaleY,
-          });
-        }
-
         // Draw simplified angle-based indicator
         const absAngle = Math.abs(rollAngle);
         const angleOK = absAngle > threshold;
