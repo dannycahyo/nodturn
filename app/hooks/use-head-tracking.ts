@@ -206,28 +206,23 @@ export function useHeadTracking(
                 });
               }
 
-              // Check for gesture trigger
+              // Check for gesture trigger (ANGLE ONLY - velocity removed)
               if (!gestureLocked) {
                 const angleExceedsThreshold =
                   Math.abs(smoothedAngle) > gestureAngleThreshold;
-                const velocityExceedsThreshold =
-                  velocity > gestureVelocityThreshold;
 
-                // Log attempt even if not triggered
-                if (angleExceedsThreshold || velocityExceedsThreshold) {
+                // Log attempt
+                if (angleExceedsThreshold) {
                   console.log('[HeadTracking] Gesture attempt:', {
                     angle: smoothedAngle.toFixed(2),
                     angleOK: angleExceedsThreshold,
-                    velocity: velocity.toFixed(2),
-                    velocityOK: velocityExceedsThreshold,
-                    bothOK: angleExceedsThreshold && velocityExceedsThreshold
+                    velocity: velocity.toFixed(2)
                   });
                 }
 
-                if (angleExceedsThreshold && velocityExceedsThreshold) {
+                if (angleExceedsThreshold) {
                   console.log('[HeadTracking] 🎯 GESTURE TRIGGERED!', {
                     angle: smoothedAngle.toFixed(2),
-                    velocity: velocity.toFixed(2),
                     direction:
                       smoothedAngle > 0 ? 'RIGHT (next)' : 'LEFT (prev)'
                   });

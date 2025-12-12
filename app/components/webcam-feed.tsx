@@ -198,79 +198,51 @@ export function WebcamFeed({
           console.log('[WebcamFeed] Drawing keypoints', { leftEar, rightEar, scaleX, scaleY });
         }
 
-        // Draw enhanced angle indicator with direction
+        // Draw simplified angle-based indicator
         const absAngle = Math.abs(rollAngle);
         const angleOK = absAngle > threshold;
-        const velocityOK = velocity > velocityThreshold;
-        const bothOK = angleOK && velocityOK;
         const direction = rollAngle > 0 ? '→ NEXT' : '← PREV';
 
-        // Larger box with more info
+        // Box with angle info
         ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-        ctx.fillRect(10, 10, 200, 135);
+        ctx.fillRect(10, 10, 200, 110);
 
         // Angle value (large and prominent)
-        ctx.font = 'bold 18px monospace';
+        ctx.font = 'bold 24px monospace';
         ctx.fillStyle = angleOK ? '#22c55e' : '#f59e0b';
-        ctx.fillText(`Angle: ${rollAngle.toFixed(1)}°`, 20, 30);
-        ctx.font = '11px monospace';
-        ctx.fillStyle = angleOK ? '#22c55e' : '#9ca3af';
-        ctx.fillText(`(need ${threshold}°)`, 130, 30);
+        ctx.fillText(`${rollAngle.toFixed(1)}°`, 20, 40);
 
-        // Velocity value
-        ctx.font = 'bold 18px monospace';
-        ctx.fillStyle = velocityOK ? '#22c55e' : '#f59e0b';
-        ctx.fillText(`Speed: ${velocity.toFixed(0)}°/s`, 20, 55);
-        ctx.font = '11px monospace';
-        ctx.fillStyle = velocityOK ? '#22c55e' : '#9ca3af';
-        ctx.fillText(`(need ${velocityThreshold}°/s)`, 130, 55);
+        // Threshold requirement
+        ctx.font = '14px monospace';
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillText(`Need: ${threshold}°`, 20, 60);
 
-        // Direction indicator - only show if BOTH conditions met
-        if (bothOK) {
-          ctx.font = 'bold 20px monospace';
+        // Direction indicator - show when ready
+        if (angleOK) {
+          ctx.font = 'bold 24px monospace';
           ctx.fillStyle = '#22c55e';
-          ctx.fillText(direction, 20, 85);
+          ctx.fillText(direction, 20, 90);
         } else {
-          // Show what's missing
-          ctx.font = '12px monospace';
+          // Show hint
+          ctx.font = '14px monospace';
           ctx.fillStyle = '#ef4444';
-          if (!angleOK && !velocityOK) {
-            ctx.fillText('Tilt more & faster!', 20, 85);
-          } else if (!angleOK) {
-            ctx.fillText('Tilt more!', 20, 85);
-          } else if (!velocityOK) {
-            ctx.fillText('Move faster!', 20, 85);
-          }
+          ctx.fillText('Tilt your head!', 20, 90);
         }
 
-        // Status indicator
-        ctx.font = 'bold 14px monospace';
-        if (bothOK) {
-          ctx.fillStyle = '#22c55e';
-          ctx.fillText('✓ READY', 20, 110);
-        } else {
-          ctx.fillStyle = '#f59e0b';
-          ctx.fillText('○ WAITING', 20, 110);
-        }
-
-        // Visual progress bars
+        // Visual progress bar
         const barWidth = 170;
-        const barHeight = 6;
+        const barHeight = 10;
         const barX = 20;
+        const barY = 95;
 
-        // Angle bar
+        // Background bar
         ctx.fillStyle = '#374151';
-        ctx.fillRect(barX, 117, barWidth, barHeight);
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Progress bar
         const angleProgress = Math.min(absAngle / threshold, 1.0);
         ctx.fillStyle = angleOK ? '#22c55e' : '#f59e0b';
-        ctx.fillRect(barX, 117, barWidth * angleProgress, barHeight);
-
-        // Velocity bar
-        ctx.fillStyle = '#374151';
-        ctx.fillRect(barX, 127, barWidth, barHeight);
-        const velocityProgress = Math.min(velocity / velocityThreshold, 1.0);
-        ctx.fillStyle = velocityOK ? '#22c55e' : '#f59e0b';
-        ctx.fillRect(barX, 127, barWidth * velocityProgress, barHeight);
+        ctx.fillRect(barX, barY, barWidth * angleProgress, barHeight);
       }
 
       animationId = requestAnimationFrame(draw);
