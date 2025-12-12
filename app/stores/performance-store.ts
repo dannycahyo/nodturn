@@ -16,9 +16,9 @@ interface PerformanceState {
 
   // Camera/tracking state
   cameraEnabled: boolean;
-  faceDetected: boolean;
+  poseDetected: boolean;
   setCameraEnabled: (enabled: boolean) => void;
-  setFaceDetected: (detected: boolean) => void;
+  setPoseDetected: (detected: boolean) => void;
 
   // Reset state
   resetPerformance: () => void;
@@ -29,24 +29,37 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
   totalPages: 0,
   gestureLocked: false,
   cameraEnabled: false,
-  faceDetected: false,
+  poseDetected: false,
 
   setCurrentPage: (page) => {
     const { totalPages } = get();
     set({ currentPage: Math.max(1, Math.min(page, totalPages)) });
   },
 
-  setTotalPages: (total) => set({ totalPages: total }),
+  setTotalPages: (total) => {
+    console.log('[PerformanceStore] setTotalPages called', { total });
+    set({ totalPages: total });
+  },
 
   nextPage: () => {
     const { currentPage, totalPages } = get();
+    console.log('[PerformanceStore] nextPage called', {
+      currentPage,
+      totalPages,
+      canAdvance: currentPage < totalPages
+    });
     if (currentPage < totalPages) {
       set({ currentPage: currentPage + 1 });
     }
   },
 
   prevPage: () => {
-    const { currentPage } = get();
+    const { currentPage, totalPages } = get();
+    console.log('[PerformanceStore] prevPage called', {
+      currentPage,
+      totalPages,
+      canGoBack: currentPage > 1
+    });
     if (currentPage > 1) {
       set({ currentPage: currentPage - 1 });
     }
@@ -58,7 +71,7 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
 
   setCameraEnabled: (enabled) => set({ cameraEnabled: enabled }),
 
-  setFaceDetected: (detected) => set({ faceDetected: detected }),
+  setPoseDetected: (detected) => set({ poseDetected: detected }),
 
   resetPerformance: () =>
     set({
@@ -66,6 +79,6 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
       totalPages: 0,
       gestureLocked: false,
       cameraEnabled: false,
-      faceDetected: false
+      poseDetected: false
     })
 }));
