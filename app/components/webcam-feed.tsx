@@ -219,9 +219,13 @@ export function WebcamFeed({
 
         // Direction indicator - show when ready
         if (angleOK) {
-          ctx.font = 'bold 24px monospace';
+          ctx.font = 'bold 18px monospace';
           ctx.fillStyle = '#22c55e';
-          ctx.fillText(direction, 20, 90);
+          ctx.fillText(`Hold ${direction}`, 20, 85);
+          // Additional hint
+          ctx.font = '12px monospace';
+          ctx.fillStyle = '#9ca3af';
+          ctx.fillText('(sustain tilt)', 20, 103);
         } else {
           // Show hint
           ctx.font = '14px monospace';
