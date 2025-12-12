@@ -9,11 +9,6 @@ interface PerformanceState {
   nextPage: () => void;
   prevPage: () => void;
 
-  // Gesture lock state
-  gestureLocked: boolean;
-  lockGesture: () => void;
-  unlockGesture: () => void;
-
   // Camera/tracking state
   cameraEnabled: boolean;
   poseDetected: boolean;
@@ -27,7 +22,6 @@ interface PerformanceState {
 export const usePerformanceStore = create<PerformanceState>((set, get) => ({
   currentPage: 1,
   totalPages: 0,
-  gestureLocked: false,
   cameraEnabled: false,
   poseDetected: false,
 
@@ -65,10 +59,6 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
     }
   },
 
-  lockGesture: () => set({ gestureLocked: true }),
-
-  unlockGesture: () => set({ gestureLocked: false }),
-
   setCameraEnabled: (enabled) => set({ cameraEnabled: enabled }),
 
   setPoseDetected: (detected) => set({ poseDetected: detected }),
@@ -77,7 +67,6 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
     set({
       currentPage: 1,
       totalPages: 0,
-      gestureLocked: false,
       cameraEnabled: false,
       poseDetected: false
     })

@@ -11,8 +11,6 @@ import {
 const MIN_CONFIDENCE = 0.3;
 
 interface TrackingState {
-  lastAngle: number;
-  lastTimestamp: number;
   smoothingFilter: SimpleMovingAverage;
   currentAngle: number;
   currentVelocity: number;
@@ -20,8 +18,8 @@ interface TrackingState {
 
 type TrackingAction =
   | {
-      type: 'UPDATE_ANGLE';
-      payload: { angle: number; timestamp: number; velocity: number };
+      type: 'UPDATE_DISPLAY';
+      payload: { angle: number; velocity: number };
     }
   | { type: 'RESET' };
 
@@ -30,11 +28,9 @@ function trackingReducer(
   action: TrackingAction
 ): TrackingState {
   switch (action.type) {
-    case 'UPDATE_ANGLE':
+    case 'UPDATE_DISPLAY':
       return {
         ...state,
-        lastAngle: action.payload.angle,
-        lastTimestamp: action.payload.timestamp,
         currentAngle: action.payload.angle,
         currentVelocity: action.payload.velocity
       };
@@ -42,8 +38,6 @@ function trackingReducer(
       state.smoothingFilter.reset();
       return {
         ...state,
-        lastAngle: 0,
-        lastTimestamp: 0,
         currentAngle: 0,
         currentVelocity: 0
       };
@@ -58,27 +52,19 @@ export function useHeadTracking(
   enabled: boolean
 ) {
   const [state, dispatch] = useReducer(trackingReducer, {
-    lastAngle: 0,
-    lastTimestamp: 0,
     smoothingFilter: new SimpleMovingAverage(3),
     currentAngle: 0,
     currentVelocity: 0
   });
 
   const [poses, setPoses] = useState<Pose[]>([]);
-  const lockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastPageTurnRef = useRef<number>(0);
+  const lastAngleRef = useRef<number>(0);
+  const lastTimestampRef = useRef<number>(0);
 
-  const {
-    nextPage,
-    prevPage,
-    gestureLocked,
-    lockGesture,
-    unlockGesture,
-    setPoseDetected
-  } = usePerformanceStore();
+  const { nextPage, prevPage, setPoseDetected } = usePerformanceStore();
 
-  const { gestureAngleThreshold, gestureVelocityThreshold, gestureCooldown } =
-    useSettingsStore();
+  const { gestureAngleThreshold, gestureCooldown } = useSettingsStore();
 
   useEffect(() => {
     console.log('[HeadTracking] Effect triggered', {
@@ -186,69 +172,59 @@ export function useHeadTracking(
             }
 
             const now = Date.now();
-            const timeDelta = now - state.lastTimestamp;
+            const timeDelta = now - lastTimestampRef.current;
 
             let velocity = 0;
-            if (state.lastTimestamp > 0 && timeDelta > 0) {
+            if (lastTimestampRef.current > 0 && timeDelta > 0) {
               velocity = calculateAngularVelocity(
                 smoothedAngle,
-                state.lastAngle,
+                lastAngleRef.current,
                 timeDelta
               );
-
-              if (frameCount % 30 === 0) {
-                console.log('[HeadTracking] Gesture check', {
-                  smoothedAngle: smoothedAngle.toFixed(2),
-                  velocity: velocity.toFixed(2),
-                  angleThreshold: gestureAngleThreshold,
-                  velocityThreshold: gestureVelocityThreshold,
-                  gestureLocked
-                });
-              }
-
-              // Check for gesture trigger (ANGLE ONLY - velocity removed)
-              if (!gestureLocked) {
-                const angleExceedsThreshold =
-                  Math.abs(smoothedAngle) > gestureAngleThreshold;
-
-                // Log attempt
-                if (angleExceedsThreshold) {
-                  console.log('[HeadTracking] Gesture attempt:', {
-                    angle: smoothedAngle.toFixed(2),
-                    angleOK: angleExceedsThreshold,
-                    velocity: velocity.toFixed(2)
-                  });
-                }
-
-                if (angleExceedsThreshold) {
-                  console.log('[HeadTracking] 🎯 GESTURE TRIGGERED!', {
-                    angle: smoothedAngle.toFixed(2),
-                    direction:
-                      smoothedAngle > 0 ? 'RIGHT (next)' : 'LEFT (prev)'
-                  });
-
-                  // Trigger page turn
-                  if (smoothedAngle > 0) {
-                    nextPage();
-                  } else {
-                    prevPage();
-                  }
-
-                  // Lock gesture and set cooldown
-                  lockGesture();
-                  if (lockTimeoutRef.current) {
-                    clearTimeout(lockTimeoutRef.current);
-                  }
-                  lockTimeoutRef.current = setTimeout(() => {
-                    unlockGesture();
-                  }, gestureCooldown);
-                }
-              }
             }
 
+            if (frameCount % 30 === 0) {
+              console.log('[HeadTracking] Gesture check', {
+                smoothedAngle: smoothedAngle.toFixed(2),
+                velocity: velocity.toFixed(2),
+                angleThreshold: gestureAngleThreshold,
+                lastTimestamp: lastTimestampRef.current,
+                timeDelta
+              });
+            }
+
+            // Check for gesture trigger - simple timestamp-based cooldown
+            const angleExceedsThreshold =
+              Math.abs(smoothedAngle) > gestureAngleThreshold;
+            const timeSinceLastTurn = now - lastPageTurnRef.current;
+            const canTurn = timeSinceLastTurn > gestureCooldown;
+
+            if (angleExceedsThreshold && canTurn) {
+              console.log('[HeadTracking] 🎯 GESTURE TRIGGERED!', {
+                angle: smoothedAngle.toFixed(2),
+                direction: smoothedAngle > 0 ? 'RIGHT (next)' : 'LEFT (prev)',
+                timeSinceLastTurn
+              });
+
+              // Trigger page turn
+              if (smoothedAngle > 0) {
+                nextPage();
+              } else {
+                prevPage();
+              }
+
+              // Record timestamp
+              lastPageTurnRef.current = now;
+            }
+
+            // Update refs for next iteration
+            lastAngleRef.current = smoothedAngle;
+            lastTimestampRef.current = now;
+
+            // Update display values
             dispatch({
-              type: 'UPDATE_ANGLE',
-              payload: { angle: smoothedAngle, timestamp: now, velocity }
+              type: 'UPDATE_DISPLAY',
+              payload: { angle: smoothedAngle, velocity }
             });
           }
         }
@@ -276,29 +252,19 @@ export function useHeadTracking(
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
-      if (lockTimeoutRef.current) {
-        clearTimeout(lockTimeoutRef.current);
-      }
     };
   }, [
     detector,
     videoElement,
     enabled,
-    gestureLocked,
     gestureAngleThreshold,
-    gestureVelocityThreshold,
     gestureCooldown,
-    lockGesture,
-    unlockGesture,
     nextPage,
     prevPage,
     setPoseDetected
-    // Removed state.lastAngle, state.lastTimestamp, state.smoothingFilter
-    // as they are internal state and shouldn't trigger re-runs
   ]);
 
   return {
-    gestureLocked,
     poses,
     rollAngle: state.currentAngle,
     velocity: state.currentVelocity

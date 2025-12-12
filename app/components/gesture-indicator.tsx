@@ -1,4 +1,4 @@
-import { Camera, CameraOff, Lock } from 'lucide-react';
+import { Camera, CameraOff } from 'lucide-react';
 import { usePerformanceStore } from '~/stores/performance-store';
 
 interface GestureIndicatorProps {
@@ -7,7 +7,7 @@ interface GestureIndicatorProps {
 }
 
 export function GestureIndicator({ enabled, isLoading }: GestureIndicatorProps) {
-  const { gestureLocked, poseDetected, cameraEnabled } = usePerformanceStore();
+  const { poseDetected, cameraEnabled } = usePerformanceStore();
 
   if (!enabled || !cameraEnabled) {
     return null;
@@ -16,9 +16,6 @@ export function GestureIndicator({ enabled, isLoading }: GestureIndicatorProps) 
   const getStatus = () => {
     if (isLoading) {
       return { icon: Camera, color: 'text-gray-400', label: 'Loading...' };
-    }
-    if (gestureLocked) {
-      return { icon: Lock, color: 'text-yellow-500', label: 'Locked' };
     }
     if (!poseDetected) {
       return { icon: CameraOff, color: 'text-red-500', label: 'No pose' };

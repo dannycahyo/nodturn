@@ -139,7 +139,7 @@ export default function Perform() {
   ]);
 
   // Start head tracking
-  const { gestureLocked, poses, rollAngle, velocity } = useHeadTracking(
+  const { poses, rollAngle, velocity } = useHeadTracking(
     detector,
     state.videoElement,
     state.gestureEnabled,
@@ -148,11 +148,10 @@ export default function Perform() {
   // Debug: Log hook outputs
   useEffect(() => {
     console.log('[Perform] useHeadTracking outputs', {
-      gestureLocked,
       posesCount: poses.length,
       rollAngle,
     });
-  }, [gestureLocked, poses.length, rollAngle]);
+  }, [poses.length, rollAngle]);
 
   // Cleanup video element when gestures are disabled
   useEffect(() => {
