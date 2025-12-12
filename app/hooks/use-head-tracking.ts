@@ -310,11 +310,11 @@ export function useHeadTracking(
                       },
                     );
 
-                    // Trigger page turn
+                    // Trigger page turn (reversed: left tilt = prev, right tilt = next)
                     if (currentDirection === 'right') {
-                      nextPage();
-                    } else {
                       prevPage();
+                    } else {
+                      nextPage();
                     }
 
                     // Reset and record

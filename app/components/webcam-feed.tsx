@@ -19,7 +19,7 @@ export function WebcamFeed({
   rollAngle = 0,
   threshold = 20,
   velocity = 0,
-  velocityThreshold = 30
+  velocityThreshold = 30,
 }: WebcamFeedProps) {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,22 +32,30 @@ export function WebcamFeed({
       console.log('[WebcamFeed] Video element found', {
         videoWidth: video.videoWidth,
         videoHeight: video.videoHeight,
-        readyState: video.readyState
+        readyState: video.readyState,
       });
       // Ensure video has valid dimensions before passing to detector
       if (video.videoWidth > 0 && video.videoHeight > 0) {
-        console.log('[WebcamFeed] Video ready immediately, calling onVideoReady');
+        console.log(
+          '[WebcamFeed] Video ready immediately, calling onVideoReady',
+        );
         onVideoReady(video);
       } else {
-        console.log('[WebcamFeed] Video dimensions not ready, waiting for loadedmetadata');
+        console.log(
+          '[WebcamFeed] Video dimensions not ready, waiting for loadedmetadata',
+        );
         // Wait for loadedmetadata event if dimensions not ready
-        video.addEventListener('loadedmetadata', () => {
-          console.log('[WebcamFeed] loadedmetadata event fired', {
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight
-          });
-          onVideoReady(video);
-        }, { once: true });
+        video.addEventListener(
+          'loadedmetadata',
+          () => {
+            console.log('[WebcamFeed] loadedmetadata event fired', {
+              videoWidth: video.videoWidth,
+              videoHeight: video.videoHeight,
+            });
+            onVideoReady(video);
+          },
+          { once: true },
+        );
       }
     } else {
       console.log('[WebcamFeed] No video element in webcamRef');
@@ -60,7 +68,10 @@ export function WebcamFeed({
     const video = webcamRef.current?.video;
 
     if (!canvas || !video) {
-      console.log('[WebcamFeed] Canvas or video not ready', { canvas: !!canvas, video: !!video });
+      console.log('[WebcamFeed] Canvas or video not ready', {
+        canvas: !!canvas,
+        video: !!video,
+      });
       return;
     }
 
@@ -72,7 +83,10 @@ export function WebcamFeed({
 
     console.log('[WebcamFeed] Canvas setup complete', {
       canvasSize: { width: canvas.width, height: canvas.height },
-      videoSize: { width: video.videoWidth, height: video.videoHeight }
+      videoSize: {
+        width: video.videoWidth,
+        height: video.videoHeight,
+      },
     });
 
     let animationId: number;
@@ -90,7 +104,7 @@ export function WebcamFeed({
         console.log('[WebcamFeed] Drawing frame', {
           posesCount: poses.length,
           rollAngle,
-          threshold
+          threshold,
         });
       }
 
@@ -114,10 +128,16 @@ export function WebcamFeed({
       const scaleY = canvas.height / video.videoHeight;
 
       // Get keypoints by name
-      const leftEar = keypoints.find(kp => kp.name === 'left_ear');
-      const rightEar = keypoints.find(kp => kp.name === 'right_ear');
-      const leftShoulder = keypoints.find(kp => kp.name === 'left_shoulder');
-      const rightShoulder = keypoints.find(kp => kp.name === 'right_shoulder');
+      const leftEar = keypoints.find((kp) => kp.name === 'left_ear');
+      const rightEar = keypoints.find(
+        (kp) => kp.name === 'right_ear',
+      );
+      const leftShoulder = keypoints.find(
+        (kp) => kp.name === 'left_shoulder',
+      );
+      const rightShoulder = keypoints.find(
+        (kp) => kp.name === 'right_shoulder',
+      );
 
       // Helper: Get color based on confidence score
       const getColor = (score?: number): string => {
@@ -128,8 +148,11 @@ export function WebcamFeed({
       };
 
       // Helper: Draw keypoint
-      const drawPoint = (point: { x: number; y: number; score?: number }, radius: number = 6) => {
-        const x = canvas.width - (point.x * scaleX);
+      const drawPoint = (
+        point: { x: number; y: number; score?: number },
+        radius: number = 6,
+      ) => {
+        const x = canvas.width - point.x * scaleX;
         const y = point.y * scaleY;
         const color = getColor(point.score);
 
@@ -152,14 +175,22 @@ export function WebcamFeed({
       };
 
       // Helper: Draw connection between two keypoints
-      const drawConnection = (kp1?: { x: number; y: number; score?: number }, kp2?: { x: number; y: number; score?: number }) => {
-        if (!kp1?.score || !kp2?.score || kp1.score < MIN_CONFIDENCE || kp2.score < MIN_CONFIDENCE) {
+      const drawConnection = (
+        kp1?: { x: number; y: number; score?: number },
+        kp2?: { x: number; y: number; score?: number },
+      ) => {
+        if (
+          !kp1?.score ||
+          !kp2?.score ||
+          kp1.score < MIN_CONFIDENCE ||
+          kp2.score < MIN_CONFIDENCE
+        ) {
           return;
         }
 
-        const x1 = canvas.width - (kp1.x * scaleX);
+        const x1 = canvas.width - kp1.x * scaleX;
         const y1 = kp1.y * scaleY;
-        const x2 = canvas.width - (kp2.x * scaleX);
+        const x2 = canvas.width - kp2.x * scaleX;
         const y2 = kp2.y * scaleY;
 
         ctx.beginPath();
@@ -185,68 +216,58 @@ export function WebcamFeed({
       if (rightEar?.score && rightEar.score > MIN_CONFIDENCE) {
         drawPoint(rightEar, 8);
       }
-      if (leftShoulder?.score && leftShoulder.score > MIN_CONFIDENCE) {
+      if (
+        leftShoulder?.score &&
+        leftShoulder.score > MIN_CONFIDENCE
+      ) {
         drawPoint(leftShoulder, 7);
       }
-      if (rightShoulder?.score && rightShoulder.score > MIN_CONFIDENCE) {
+      if (
+        rightShoulder?.score &&
+        rightShoulder.score > MIN_CONFIDENCE
+      ) {
         drawPoint(rightShoulder, 7);
       }
 
       // Only draw angle indicator if ears are detected with good confidence
-      if (leftEar?.score && leftEar.score > MIN_CONFIDENCE && rightEar?.score && rightEar.score > MIN_CONFIDENCE) {
+      if (
+        leftEar?.score &&
+        leftEar.score > MIN_CONFIDENCE &&
+        rightEar?.score &&
+        rightEar.score > MIN_CONFIDENCE
+      ) {
         if (frameCount % 30 === 0) {
-          console.log('[WebcamFeed] Drawing keypoints', { leftEar, rightEar, scaleX, scaleY });
+          console.log('[WebcamFeed] Drawing keypoints', {
+            leftEar,
+            rightEar,
+            scaleX,
+            scaleY,
+          });
         }
 
         // Draw simplified angle-based indicator
         const absAngle = Math.abs(rollAngle);
         const angleOK = absAngle > threshold;
-        const direction = rollAngle > 0 ? '→ NEXT' : '← PREV';
 
         // Box with angle info
         ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-        ctx.fillRect(10, 10, 200, 110);
+        ctx.fillRect(10, 10, 200, 70);
 
         // Angle value (large and prominent)
         ctx.font = 'bold 24px monospace';
         ctx.fillStyle = angleOK ? '#22c55e' : '#f59e0b';
         ctx.fillText(`${rollAngle.toFixed(1)}°`, 20, 40);
 
-        // Threshold requirement
+        // Simple status hint
         ctx.font = '14px monospace';
         ctx.fillStyle = '#9ca3af';
-        ctx.fillText(`Need: ${threshold}°`, 20, 60);
-
-        // Direction indicator - show when ready
         if (angleOK) {
-          ctx.font = 'bold 18px monospace';
           ctx.fillStyle = '#22c55e';
-          ctx.fillText(`Hold ${direction}`, 20, 85);
-          // Additional hint
-          ctx.font = '12px monospace';
-          ctx.fillStyle = '#9ca3af';
-          ctx.fillText('(sustain tilt)', 20, 103);
+          ctx.fillText('Ready', 20, 60);
         } else {
-          // Show hint
-          ctx.font = '14px monospace';
           ctx.fillStyle = '#ef4444';
-          ctx.fillText('Tilt your head!', 20, 90);
+          ctx.fillText('Tilt your head!', 20, 60);
         }
-
-        // Visual progress bar
-        const barWidth = 170;
-        const barHeight = 10;
-        const barX = 20;
-        const barY = 95;
-
-        // Background bar
-        ctx.fillStyle = '#374151';
-        ctx.fillRect(barX, barY, barWidth, barHeight);
-
-        // Progress bar
-        const angleProgress = Math.min(absAngle / threshold, 1.0);
-        ctx.fillStyle = angleOK ? '#22c55e' : '#f59e0b';
-        ctx.fillRect(barX, barY, barWidth * angleProgress, barHeight);
       }
 
       animationId = requestAnimationFrame(draw);
