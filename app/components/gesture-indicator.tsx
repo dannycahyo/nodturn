@@ -7,7 +7,7 @@ interface GestureIndicatorProps {
 }
 
 export function GestureIndicator({ enabled, isLoading }: GestureIndicatorProps) {
-  const { gestureLocked, faceDetected, cameraEnabled } = usePerformanceStore();
+  const { gestureLocked, poseDetected, cameraEnabled } = usePerformanceStore();
 
   if (!enabled || !cameraEnabled) {
     return null;
@@ -20,8 +20,8 @@ export function GestureIndicator({ enabled, isLoading }: GestureIndicatorProps) 
     if (gestureLocked) {
       return { icon: Lock, color: 'text-yellow-500', label: 'Locked' };
     }
-    if (!faceDetected) {
-      return { icon: CameraOff, color: 'text-red-500', label: 'No face' };
+    if (!poseDetected) {
+      return { icon: CameraOff, color: 'text-red-500', label: 'No pose' };
     }
     return { icon: Camera, color: 'text-green-500', label: 'Ready' };
   };
