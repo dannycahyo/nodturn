@@ -15,12 +15,13 @@ interface TrackingState {
   lastTimestamp: number;
   smoothingFilter: SimpleMovingAverage;
   currentAngle: number;
+  currentVelocity: number;
 }
 
 type TrackingAction =
   | {
       type: 'UPDATE_ANGLE';
-      payload: { angle: number; timestamp: number };
+      payload: { angle: number; timestamp: number; velocity: number };
     }
   | { type: 'RESET' };
 
@@ -34,7 +35,8 @@ function trackingReducer(
         ...state,
         lastAngle: action.payload.angle,
         lastTimestamp: action.payload.timestamp,
-        currentAngle: action.payload.angle
+        currentAngle: action.payload.angle,
+        currentVelocity: action.payload.velocity
       };
     case 'RESET':
       state.smoothingFilter.reset();
@@ -42,7 +44,8 @@ function trackingReducer(
         ...state,
         lastAngle: 0,
         lastTimestamp: 0,
-        currentAngle: 0
+        currentAngle: 0,
+        currentVelocity: 0
       };
     default:
       return state;
@@ -58,7 +61,8 @@ export function useHeadTracking(
     lastAngle: 0,
     lastTimestamp: 0,
     smoothingFilter: new SimpleMovingAverage(3),
-    currentAngle: 0
+    currentAngle: 0,
+    currentVelocity: 0
   });
 
   const [poses, setPoses] = useState<Pose[]>([]);
@@ -184,8 +188,9 @@ export function useHeadTracking(
             const now = Date.now();
             const timeDelta = now - state.lastTimestamp;
 
+            let velocity = 0;
             if (state.lastTimestamp > 0 && timeDelta > 0) {
-              const velocity = calculateAngularVelocity(
+              velocity = calculateAngularVelocity(
                 smoothedAngle,
                 state.lastAngle,
                 timeDelta
@@ -248,7 +253,7 @@ export function useHeadTracking(
 
             dispatch({
               type: 'UPDATE_ANGLE',
-              payload: { angle: smoothedAngle, timestamp: now }
+              payload: { angle: smoothedAngle, timestamp: now, velocity }
             });
           }
         }
@@ -297,5 +302,10 @@ export function useHeadTracking(
     // as they are internal state and shouldn't trigger re-runs
   ]);
 
-  return { gestureLocked, poses, rollAngle: state.currentAngle };
+  return {
+    gestureLocked,
+    poses,
+    rollAngle: state.currentAngle,
+    velocity: state.currentVelocity
+  };
 }

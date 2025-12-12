@@ -92,6 +92,9 @@ export default function Perform() {
   const gestureAngleThreshold = useSettingsStore(
     (s) => s.gestureAngleThreshold,
   );
+  const gestureVelocityThreshold = useSettingsStore(
+    (s) => s.gestureVelocityThreshold,
+  );
 
   // Load face mesh model
   const {
@@ -136,7 +139,7 @@ export default function Perform() {
   ]);
 
   // Start head tracking
-  const { gestureLocked, poses, rollAngle } = useHeadTracking(
+  const { gestureLocked, poses, rollAngle, velocity } = useHeadTracking(
     detector,
     state.videoElement,
     state.gestureEnabled,
@@ -281,6 +284,8 @@ export default function Perform() {
             poses={poses}
             rollAngle={rollAngle}
             threshold={gestureAngleThreshold}
+            velocity={velocity}
+            velocityThreshold={gestureVelocityThreshold}
           />
           <GestureIndicator
             enabled={state.gestureEnabled}
