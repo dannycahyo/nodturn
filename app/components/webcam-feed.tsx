@@ -189,20 +189,47 @@ export function WebcamFeed({ onVideoReady, poses = [], rollAngle = 0, threshold 
           console.log('[WebcamFeed] Drawing keypoints', { leftEar, rightEar, scaleX, scaleY });
         }
 
-        // Draw angle indicator
+        // Draw enhanced angle indicator with direction
         const absAngle = Math.abs(rollAngle);
         const exceedsThreshold = absAngle > threshold;
         const angleColor = exceedsThreshold ? '#22c55e' : '#f59e0b';
+        const direction = rollAngle > 0 ? '→ NEXT' : '← PREV';
 
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(10, 10, 120, 50);
+        // Larger box with more info
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(10, 10, 180, 90);
 
-        ctx.font = '14px monospace';
+        // Angle value (large and prominent)
+        ctx.font = 'bold 20px monospace';
         ctx.fillStyle = angleColor;
-        ctx.fillText(`Angle: ${rollAngle.toFixed(1)}°`, 20, 30);
+        ctx.fillText(`${rollAngle.toFixed(1)}°`, 20, 35);
 
+        // Direction indicator
+        if (exceedsThreshold) {
+          ctx.font = 'bold 16px monospace';
+          ctx.fillStyle = '#22c55e';
+          ctx.fillText(direction, 20, 60);
+        }
+
+        // Threshold line
+        ctx.font = '12px monospace';
         ctx.fillStyle = exceedsThreshold ? '#22c55e' : '#6b7280';
-        ctx.fillText(`Threshold: ${threshold}°`, 20, 50);
+        ctx.fillText(`Need: ${threshold}°`, 20, 80);
+
+        // Visual threshold bar
+        const barWidth = 150;
+        const barHeight = 8;
+        const barX = 20;
+        const barY = 85;
+
+        // Background bar
+        ctx.fillStyle = '#374151';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Progress bar
+        const progress = Math.min(absAngle / threshold, 1.0);
+        ctx.fillStyle = exceedsThreshold ? '#22c55e' : '#f59e0b';
+        ctx.fillRect(barX, barY, barWidth * progress, barHeight);
       }
 
       animationId = requestAnimationFrame(draw);

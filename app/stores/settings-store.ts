@@ -33,8 +33,8 @@ export const useSettingsStore = create<SettingsState>()(
       metronomeBPM: 120,
       metronomeEnabled: false,
       metronomePosition: 'top-right',
-      gestureAngleThreshold: 20,
-      gestureVelocityThreshold: 100,
+      gestureAngleThreshold: 10, // Reduced from 20 to 10 degrees - easier to trigger
+      gestureVelocityThreshold: 50, // Reduced from 100 to 50 deg/sec - slower movement OK
       gestureCooldown: 1500,
 
       // Actions

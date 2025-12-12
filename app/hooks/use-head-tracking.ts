@@ -208,11 +208,23 @@ export function useHeadTracking(
                 const velocityExceedsThreshold =
                   velocity > gestureVelocityThreshold;
 
+                // Log attempt even if not triggered
+                if (angleExceedsThreshold || velocityExceedsThreshold) {
+                  console.log('[HeadTracking] Gesture attempt:', {
+                    angle: smoothedAngle.toFixed(2),
+                    angleOK: angleExceedsThreshold,
+                    velocity: velocity.toFixed(2),
+                    velocityOK: velocityExceedsThreshold,
+                    bothOK: angleExceedsThreshold && velocityExceedsThreshold
+                  });
+                }
+
                 if (angleExceedsThreshold && velocityExceedsThreshold) {
                   console.log('[HeadTracking] 🎯 GESTURE TRIGGERED!', {
                     angle: smoothedAngle.toFixed(2),
                     velocity: velocity.toFixed(2),
-                    direction: smoothedAngle > 0 ? 'RIGHT' : 'LEFT'
+                    direction:
+                      smoothedAngle > 0 ? 'RIGHT (next)' : 'LEFT (prev)'
                   });
 
                   // Trigger page turn
