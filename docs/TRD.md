@@ -21,7 +21,7 @@ The application follows a modular, client-side architecture. No backend server i
 1.  **Input (File):** User drags a PDF file into the application.
 2.  **Processing (PDF):** The PDF is parsed and rendered into high-quality HTML5 Canvas elements.
 3.  **Input (Video):** The webcam feeds video frames to the TensorFlow.js engine.
-4.  **Processing (AI):** The `face-landmarks-detection` model tracks the user's head orientation (yaw, pitch, roll) in real-time.
+4.  **Processing (AI):** The `pose-detection` model tracks the user's head orientation.
 5.  **Logic:** The "Gesture Engine" analyzes the head movement history. If a sharp "tilt" or "turn" is detected, it triggers a state change.
 6.  **Output:** The state change updates the `pageNumber` in the PDF Viewer, instantly rendering the next or previous page.
 
