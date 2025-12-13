@@ -81,61 +81,6 @@ docs/
   └── TRD.md         # Technical Requirements Document
 ```
 
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-The build output will be in the `build/` directory:
-
-- `build/client/` - Static assets (JS, CSS, fonts, assets)
-- `build/server/` - Server-side code for SSR
-
-Start the production server:
-
-```bash
-npm start
-```
-
-## Deployment
-
-### Docker Deployment
-
-Build and run using Docker:
-
-```bash
-docker build -t nodturn .
-
-# Run the container
-docker run -p 3000:3000 nodturn
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`:
-
-```
-├── package.json
-├── package-lock.json
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
 ## Configuration
 
 Key settings are available in the app's settings panel:
@@ -159,7 +104,7 @@ Key settings are available in the app's settings panel:
 
 ## License
 
-Private project by Danny Dwi Cahyono
+Public project by Danny Dwi Cahyono
 
 ---
 
