@@ -52,14 +52,6 @@ npm run dev
 
 Your application will be available at `http://localhost:5173`.
 
-### Type Checking
-
-Run TypeScript type checking:
-
-```bash
-npm run typecheck
-```
-
 ## How It Works
 
 1. **Import Music** - Drag and drop PDF files into your library
