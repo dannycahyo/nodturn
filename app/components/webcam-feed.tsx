@@ -238,7 +238,7 @@ export function WebcamFeed({
 
   return (
     <div className="fixed top-4 right-4 z-50">
-      <div className="bg-background/95 backdrop-blur rounded-lg shadow-lg overflow-hidden border relative">
+      <div className="rounded-lg shadow-lg overflow-hidden border relative">
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -249,14 +249,14 @@ export function WebcamFeed({
             height: 480,
           }}
           onUserMedia={handleUserMedia}
-          className="w-48 h-36 object-cover"
+          className="w-80 h-60 object-cover"
           mirrored
         />
         <canvas
           ref={canvasRef}
-          width={192}
-          height={144}
-          className="absolute inset-0 w-48 h-36 pointer-events-none"
+          width={320}
+          height={240}
+          className="absolute inset-0 w-80 h-60 pointer-events-none"
         />
       </div>
     </div>
